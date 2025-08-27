@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Screen - Coffee Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .banner-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+        }
+        .banner-carousel > div {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+        }
+        .category-scroll, .popular-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x proximity;
+            gap: 16px;
+        }
+        .category-scroll > div, .popular-scroll > div {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+        }
+        .fixed-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Top Bar -->
+    <header class="fixed-top bg-white shadow p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <img id="cafe-logo" src="coffee_logo1.png" alt="Coffee Shop Logo" class="h-8 w-8">
+            <span id="cafe-name" class="font-bold text-lg">[Название кофейни]</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button class="text-gray-600" onclick="openChangeCoffeeModal()">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+            <button class="relative" onclick="openCart()">
+                <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </button>
+            <div id="balance" class="text-sm">Баланс: 0 ₽</div>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <section id="banner-section" class="banner-carousel mt-4"></section>
+
+    <!-- Quick Menu -->
+    <section class="mt-6 px-4">
+        <div id="category-scroll" class="category-scroll"></div>
+    </section>
+
+    <!-- Popular Items -->
+    <section class="mt-6 px-4">
+        <h2 id="popular-title" class="text-lg font-bold">Популярное в [Название кофейни]</h2>
+        <div id="popular-scroll" class="popular-scroll mt-2"></div>
+    </section>
+
+    <!-- Search -->
+    <section class="mt-6 px-4">
+        <div class="relative">
+            <input type="text" id="search-input" placeholder="Найти в меню [Название кофейни]..." class="w-full p-2 pl-10 rounded-lg border" onfocus="goToSearch()">
+            <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Personal Recommendations -->
+    <section class="mt-6 px-4" id="recommendations" style="display: none;">
+        <h2 id="rec-title" class="text-lg font-bold">Вам может понравиться в [Название кофейни]</h2>
+        <button class="mt-2 w-full bg-gray-200 p-2 rounded text-left" onclick="repeatLastOrder()">
+            Повторить последний заказ
+        </button>
+    </section>
+
+    <!-- Other Coffee Shops -->
+    <section class="mt-6 px-4 mb-6">
+        <h2 class="text-lg font-bold">А также в других наших кофейнях</h2>
+        <div id="other-coffees" class="flex gap-4 mt-2"></div>
+    </section>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const cafeId = urlParams.get('cafe_id') || '1';
+
+        const cafeData = {
+            '1': {
+                name: 'Кофейня Центральная',
+                logo: 'coffee_logo1.png',
+                balance: 150,
+                banners: [
+                    { url: '/promo/latte?cafe_id=1', img: 'promo_latte.jpg', text: 'Скидка 20% на латте до 12:00' },
+                    { url: '/promo/cappuccino?cafe_id=1', img: 'promo_cappuccino.jpg', text: 'Капучино + круассан за 250 ₽' }
+                ],
+                categories: [
+                    { name: 'Кофе', icon: 'coffee_icon.png', url: '/category/coffee?cafe_id=1' },
+                    { name: 'Десерты', icon: 'dessert_icon.png', url: '/category/desserts?cafe_id=1' },
+                    { name: 'Напитки', icon: 'drinks_icon.png', url: '/category/drinks?cafe_id=1' },
+                    { name: 'Закуски', icon: 'snacks_icon.png', url: '/category/snacks?cafe_id=1' },
+                    { name: 'Завтраки', icon: 'breakfast_icon.png', url: '/category/breakfast?cafe_id=1' }
+                ],
+                popular: [
+                    { id: 'latte', name: 'Классический латте', price: 190, img: 'latte.jpg', url: '/item/latte?cafe_id=1' },
+                    { id: 'cappuccino', name: 'Капучино', price: 210, img: 'cappuccino.jpg', url: '/item/cappuccino?cafe_id=1' }
+                ],
+                other: [
+                    { id: '2', name: 'Кофейня Уютная', img: 'coffee2.jpg' },
+                    { id: '3', name: 'Кофейня Экспресс', img: 'coffee3.jpg' }
+                ]
+            },
+            '2': {
+                name: 'Кофейня Уютная',
+                logo: 'coffee_logo2.png',
+                balance: 200,
+                banners: [
+                    { url: '/promo/espresso?cafe_id=2', img: 'promo_espresso.jpg', text: 'Эспрессо за 100 ₽' }
+                ],
+                categories: [
+                    { name: 'Кофе', icon: 'coffee_icon.png', url: '/category/coffee?cafe_id=2' },
+                    { name: 'Чай', icon: 'tea_icon.png', url: '/category/tea?cafe_id=2' }
+                ],
+                popular: [
+                    { id: 'espresso', name: 'Эспрессо', price: 100, img: 'espresso.jpg', url: '/item/espresso?cafe_id=2' }
+                ],
+                other: [
+                    { id: '1', name: 'Кофейня Центральная', img: 'coffee1.jpg' },
+                    { id: '3', name: 'Кофейня Экспресс', img: 'coffee3.jpg' }
+                ]
+            },
+        };
+
+        const currentCafe = cafeData[cafeId] || cafeData['1'];
+
+        document.getElementById('cafe-name').textContent = currentCafe.name;
+        document.getElementById('cafe-logo').src = currentCafe.logo;
+        document.getElementById('balance').textContent = `Баланс: ${currentCafe.balance} ₽`;
+        document.getElementById('popular-title').textContent = `Популярное в ${currentCafe.name}`;
+        document.getElementById('search-input').placeholder = `Найти в меню ${currentCafe.name}...`;
+        document.getElementById('rec-title').textContent = `Вам может понравиться в ${currentCafe.name}`;
+
+        const bannerSection = document.getElementById('banner-section');
+        currentCafe.banners.forEach(banner => {
+            const div = document.createElement('div');
+            div.className = 'w-full relative';
+            div.innerHTML = `
+                <a href="${banner.url}">
+                    <img src="${banner.img}" alt="Promo Banner" class="w-full h-40 object-cover">
+                    <div class="absolute bottom-0 bg-black bg-opacity-50 text-white p-2 w-full">
+                        ${banner.text}
+                    </div>
+                </a>
+            `;
+            bannerSection.appendChild(div);
+        });
+
+        let currentBanner = 0;
+        const banners = bannerSection.children;
+        if (banners.length > 1) {
+            setInterval(() => {
+                currentBanner = (currentBanner + 1) % banners.length;
+                banners[currentBanner].scrollIntoView({ behavior: 'smooth' });
+            }, 5000);
+        }
+
+        const categoryScroll = document.getElementById('category-scroll');
+        currentCafe.categories.forEach(cat => {
+            const a = document.createElement('a');
+            a.href = cat.url;
+            a.className = 'flex flex-col items-center w-20';
+            a.innerHTML = `
+                <img src="${cat.icon}" alt="${cat.name}" class="h-12 w-12">
+                <span class="text-sm mt-1">${cat.name}</span>
+            `;
+            categoryScroll.appendChild(a);
+        });
+
+        const popularScroll = document.getElementById('popular-scroll');
+        currentCafe.popular.forEach(item => {
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.className = 'w-40 bg-white rounded-lg shadow p-2';
+            a.innerHTML = `
+                <img src="${item.img}" alt="${item.name}" class="w-full h-32 object-cover rounded">
+                <h3 class="text-sm font-semibold mt-2 line-clamp-2">${item.name}</h3>
+                <p class="text-sm text-gray-600">${item.price} ₽</p>
+                <button class="mt-2 w-full bg-green-500 text-white py-1 rounded flex items-center justify-center" onclick="event.preventDefault(); addToCart('${item.id}')">
+                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Добавить
+                </button>
+            `;
+            popularScroll.appendChild(a);
+        });
+
+        const otherCoffees = document.getElementById('other-coffees');
+        currentCafe.other.forEach(cafe => {
+            const button = document.createElement('button');
+            button.className = 'w-40 bg-white rounded-lg shadow p-2';
+            button.onclick = () => openChangeCoffeeModal(cafe.id);
+            button.innerHTML = `
+                <img src="${cafe.img}" alt="${cafe.name}" class="w-full h-32 object-cover rounded">
+                <h3 class="text-sm font-semibold mt-2">${cafe.name}</h3>
+                <p class="text-sm text-green-500">Выбрать</p>
+            `;
+            otherCoffees.appendChild(button);
+        });
+
+        let cartItems = 0;
+
+        function openChangeCoffeeModal(newCafeId) {
+            tg.showConfirm('Сменить кофейню?', (confirmed) => {
+                if (confirmed && newCafeId) {
+                    window.location.href = `main.html?cafe_id=${newCafeId}`;
+                } else if (confirmed) {
+                    tg.showAlert('Функция смены кофейни в разработке.');
+                }
+            });
+        }
+
+        function openCart() {
+            tg.showAlert('Открытие корзины в разработке.');
+        }
+
+        function addToCart(itemId) {
+            cartItems++;
+            document.getElementById('cart-count').textContent = cartItems;
+            tg.showAlert(`Товар ${itemId} добавлен в корзину!`);
+        }
+
+        function goToSearch() {
+            tg.showAlert('Переход на поиск в разработке.');
+        }
+
+        function repeatLastOrder() {
+            tg.showAlert('Последний заказ добавлен в корзину!');
+        }
+
+        if (tg.initDataUnsafe.user) {
+            document.getElementById('recommendations').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
