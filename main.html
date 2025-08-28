@@ -38,7 +38,7 @@
     <!-- Top Bar -->
     <header class="fixed-top bg-white shadow p-4 flex justify-between items-center">
         <div class="flex items-center space-x-2">
-            <img id="cafe-logo" src="coffee_logo1.png" alt="Coffee Shop Logo" class="h-8 w-8">
+            <img id="cafe-logo" src="https://via.placeholder.com/32" alt="Coffee Shop Logo" class="h-8 w-8">
             <span id="cafe-name" class="font-bold text-lg">[Название кофейни]</span>
         </div>
         <div class="flex items-center space-x-4">
@@ -105,47 +105,66 @@
         const cafeData = {
             '1': {
                 name: 'Кофейня Центральная',
-                logo: 'coffee_logo1.png',
+                logo: 'https://via.placeholder.com/32',
                 balance: 150,
                 banners: [
-                    { url: '/promo/latte?cafe_id=1', img: 'promo_latte.jpg', text: 'Скидка 20% на латте до 12:00' },
-                    { url: '/promo/cappuccino?cafe_id=1', img: 'promo_cappuccino.jpg', text: 'Капучино + круассан за 250 ₽' }
+                    { url: '/promo/latte?cafe_id=1', img: 'https://via.placeholder.com/300x150', text: 'Скидка 20% на латте до 12:00' },
+                    { url: '/promo/cappuccino?cafe_id=1', img: 'https://via.placeholder.com/300x150', text: 'Капучино + круассан за 250 ₽' }
                 ],
                 categories: [
-                    { name: 'Кофе', icon: 'coffee_icon.png', url: '/category/coffee?cafe_id=1' },
-                    { name: 'Десерты', icon: 'dessert_icon.png', url: '/category/desserts?cafe_id=1' },
-                    { name: 'Напитки', icon: 'drinks_icon.png', url: '/category/drinks?cafe_id=1' },
-                    { name: 'Закуски', icon: 'snacks_icon.png', url: '/category/snacks?cafe_id=1' },
-                    { name: 'Завтраки', icon: 'breakfast_icon.png', url: '/category/breakfast?cafe_id=1' }
+                    { name: 'Кофе', icon: 'https://via.placeholder.com/48', url: '/category/coffee?cafe_id=1' },
+                    { name: 'Десерты', icon: 'https://via.placeholder.com/48', url: '/category/desserts?cafe_id=1' },
+                    { name: 'Напитки', icon: 'https://via.placeholder.com/48', url: '/category/drinks?cafe_id=1' },
+                    { name: 'Закуски', icon: 'https://via.placeholder.com/48', url: '/category/snacks?cafe_id=1' },
+                    { name: 'Завтраки', icon: 'https://via.placeholder.com/48', url: '/category/breakfast?cafe_id=1' }
                 ],
                 popular: [
-                    { id: 'latte', name: 'Классический латте', price: 190, img: 'latte.jpg', url: '/item/latte?cafe_id=1' },
-                    { id: 'cappuccino', name: 'Капучино', price: 210, img: 'cappuccino.jpg', url: '/item/cappuccino?cafe_id=1' }
+                    { id: 'latte', name: 'Классический латте', price: 190, img: 'https://via.placeholder.com/160', url: '/item/latte?cafe_id=1' },
+                    { id: 'cappuccino', name: 'Капучино', price: 210, img: 'https://via.placeholder.com/160', url: '/item/cappuccino?cafe_id=1' }
                 ],
                 other: [
-                    { id: '2', name: 'Кофейня Уютная', img: 'coffee2.jpg' },
-                    { id: '3', name: 'Кофейня Экспресс', img: 'coffee3.jpg' }
+                    { id: '2', name: 'Кофейня Уютная', img: 'https://via.placeholder.com/160' },
+                    { id: '3', name: 'Кофейня Экспресс', img: 'https://via.placeholder.com/160' }
                 ]
             },
             '2': {
                 name: 'Кофейня Уютная',
-                logo: 'coffee_logo2.png',
+                logo: 'https://via.placeholder.com/32',
                 balance: 200,
                 banners: [
-                    { url: '/promo/espresso?cafe_id=2', img: 'promo_espresso.jpg', text: 'Эспрессо за 100 ₽' }
+                    { url: '/promo/espresso?cafe_id=2', img: 'https://via.placeholder.com/300x150', text: 'Эспрессо за 100 ₽' }
                 ],
                 categories: [
-                    { name: 'Кофе', icon: 'coffee_icon.png', url: '/category/coffee?cafe_id=2' },
-                    { name: 'Чай', icon: 'tea_icon.png', url: '/category/tea?cafe_id=2' }
+                    { name: 'Кофе', icon: 'https://via.placeholder.com/48', url: '/category/coffee?cafe_id=2' },
+                    { name: 'Чай', icon: 'https://via.placeholder.com/48', url: '/category/tea?cafe_id=2' }
                 ],
                 popular: [
-                    { id: 'espresso', name: 'Эспрессо', price: 100, img: 'espresso.jpg', url: '/item/espresso?cafe_id=2' }
+                    { id: 'espresso', name: 'Эспрессо', price: 100, img: 'https://via.placeholder.com/160', url: '/item/espresso?cafe_id=2' }
                 ],
                 other: [
-                    { id: '1', name: 'Кофейня Центральная', img: 'coffee1.jpg' },
-                    { id: '3', name: 'Кофейня Экспресс', img: 'coffee3.jpg' }
+                    { id: '1', name: 'Кофейня Центральная', img: 'https://via.placeholder.com/160' },
+                    { id: '3', name: 'Кофейня Экспресс', img: 'https://via.placeholder.com/160' }
                 ]
             },
+            '3': {
+                name: 'Кофейня Экспресс',
+                logo: 'https://via.placeholder.com/32',
+                balance: 100,
+                banners: [
+                    { url: '/promo/americano?cafe_id=3', img: 'https://via.placeholder.com/300x150', text: 'Американо за 120 ₽' }
+                ],
+                categories: [
+                    { name: 'Кофе', icon: 'https://via.placeholder.com/48', url: '/category/coffee?cafe_id=3' },
+                    { name: 'Напитки', icon: 'https://via.placeholder.com/48', url: '/category/drinks?cafe_id=3' }
+                ],
+                popular: [
+                    { id: 'americano', name: 'Американо', price: 120, img: 'https://via.placeholder.com/160', url: '/item/americano?cafe_id=3' }
+                ],
+                other: [
+                    { id: '1', name: 'Кофейня Центральная', img: 'https://via.placeholder.com/160' },
+                    { id: '2', name: 'Кофейня Уютная', img: 'https://via.placeholder.com/160' }
+                ]
+            }
         };
 
         const currentCafe = cafeData[cafeId] || cafeData['1'];
@@ -232,7 +251,7 @@
                 if (confirmed && newCafeId) {
                     window.location.href = `main.html?cafe_id=${newCafeId}`;
                 } else if (confirmed) {
-                    tg.showAlert('Функция смены кофейни в разработке.');
+                    window.location.href = 'index.html'; // Возврат на главную страницу
                 }
             });
         }
