@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Automation - Telegram Web App</title>
+    <title>Coffee Automation</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -14,14 +14,13 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6d4c41, #8d6e63);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
+            padding: 20px;
             color: white;
         }
         
@@ -32,10 +31,12 @@
             padding: 40px;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.8s ease-out;
         }
         
-        .icon {
+        .logo {
             font-size: 80px;
             margin-bottom: 20px;
             animation: bounce 2s infinite;
@@ -43,14 +44,14 @@
         
         h1 {
             font-size: 2.5rem;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         p {
             font-size: 1.1rem;
             line-height: 1.6;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             opacity: 0.9;
         }
         
@@ -59,9 +60,56 @@
             padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
-            font-family: monospace;
             text-align: left;
-            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .cafe-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .cafe-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .cafe-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+        }
+        
+        .cafe-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6d4c41;
+        }
+        
+        .cafe-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .cafe-info p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            opacity: 0.8;
         }
         
         .button {
@@ -69,17 +117,22 @@
             color: white;
             border: none;
             padding: 15px 30px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
             font-weight: bold;
             width: 100%;
             margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .button:hover {
-            transform: translateY(-3px);
+            background: #45a049;
+            transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         
@@ -87,14 +140,17 @@
             transform: translateY(0);
         }
         
-        .secondary {
+        .button.secondary {
             background: rgba(255, 255, 255, 0.2);
         }
         
-        .telegram-info {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.2);
+        .button.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes bounce {
@@ -110,30 +166,34 @@
             h1 {
                 font-size: 2rem;
             }
+            
+            .logo {
+                font-size: 60px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">☕</div>
+        <div class="logo">☕</div>
         <h1>Coffee Automation</h1>
-        <p>Добро пожаловать в наше Telegram веб-приложение для заказа кофе!</p>
+        <p>Добро пожаловать! Выберите кофейню, чтобы начать заказ.</p>
         
         <div class="status" id="status">
-            Загрузка Telegram Web App...
+            <strong>📱 Загружаем данные...</strong>
         </div>
         
-        <button class="button" onclick="showCafes()">
-            🏪 Посмотреть кофейни
-        </button>
-        
-        <button class="button secondary" onclick="testAlert()">
-            🧪 Тестовая кнопка
-        </button>
-        
-        <div class="telegram-info" id="telegram-info">
-            <p><small>Запущено из Telegram</small></p>
+        <div class="cafe-list" id="cafeList">
+            <!-- Кофейни будут загружены динамически -->
         </div>
+        
+        <button class="button" onclick="loadCafes()">
+            <span>🔄</span> Обновить список
+        </button>
+        
+        <button class="button secondary" onclick="testTelegram()">
+            <span>🧪</span> Тест Telegram API
+        </button>
     </div>
 
     <script>
@@ -143,68 +203,108 @@
         // Расширяем на весь экран
         tg.expand();
         
-        // Показываем кнопку "Назад" если нужно
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            window.history.back();
-        });
-        
         // Обновляем статус
-        document.getElementById('status').innerHTML = `
-            <strong>✅ Telegram Web App подключен</strong><br>
-            Пользователь: ${tg.initDataUnsafe.user?.first_name || 'Гость'}<br>
-            ID: ${tg.initDataUnsafe.user?.id || 'Неизвестно'}<br>
-            Платформа: ${tg.platform}
-        `;
+        const statusElement = document.getElementById('status');
         
-        // Показываем информацию о Telegram
-        document.getElementById('telegram-info').innerHTML = `
-            <p><small>Запущено из Telegram • ${tg.platform} • v${tg.version}</small></p>
-        `;
+        if (tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            statusElement.innerHTML = `
+                <strong>✅ Подключено к Telegram</strong><br>
+                👤 Пользователь: ${user.first_name || 'Гость'}<br>
+                📱 ID: ${user.id}<br>
+                🌐 Платформа: ${tg.platform}
+            `;
+        } else {
+            statusElement.innerHTML = `
+                <strong>⚠️ Запущено вне Telegram</strong><br>
+                Для полной функциональности откройте через бота
+            `;
+        }
         
-        // Функции
-        function showCafes() {
-            const cafes = [
-                { id: 1, name: "Кофейня Центральная" },
-                { id: 2, name: "Кофейня Уютная" },
-                { id: 3, name: "Кофейня Экспресс" }
-            ];
+        // Список кофеен
+        const cafes = [
+            {
+                id: 1,
+                name: "Coffee & Books",
+                description: "Уютная кофейня с библиотекой",
+                icon: "📚",
+                rating: "4.8",
+                delivery: "20-30 мин"
+            },
+            {
+                id: 2,
+                name: "Urban Roast",
+                description: "Современная кофейня с обжаркой",
+                icon: "🏙️",
+                rating: "4.6",
+                delivery: "15-25 мин"
+            },
+            {
+                id: 3,
+                name: "Sweet Bean",
+                description: "Кофейня с домашней выпечкой",
+                icon: "🍩",
+                rating: "4.9",
+                delivery: "25-35 мин"
+            }
+        ];
+        
+        // Функция загрузки кофеен
+        function loadCafes() {
+            const cafeList = document.getElementById('cafeList');
+            cafeList.innerHTML = '';
             
-            let cafesHTML = '<h3>🏪 Наши кофейни:</h3>';
             cafes.forEach(cafe => {
-                cafesHTML += `
-                    <div style="background:rgba(255,255,255,0.1);padding:10px;margin:10px 0;border-radius:10px;">
-                        <strong>${cafe.name}</strong><br>
-                        <button onclick="selectCafe(${cafe.id})" style="margin-top:5px;padding:5px 15px;border-radius:5px;background:#4CAF50;color:white;border:none;">
-                            Выбрать
-                        </button>
+                const cafeCard = document.createElement('div');
+                cafeCard.className = 'cafe-card';
+                cafeCard.onclick = () => selectCafe(cafe.id);
+                
+                cafeCard.innerHTML = `
+                    <div class="cafe-icon">${cafe.icon}</div>
+                    <div class="cafe-info">
+                        <h3>${cafe.name}</h3>
+                        <p>${cafe.description}</p>
+                        <p>⭐ ${cafe.rating} • 🚚 ${cafe.delivery}</p>
                     </div>
                 `;
+                
+                cafeList.appendChild(cafeCard);
             });
             
-            document.getElementById('status').innerHTML = cafesHTML;
+            tg.HapticFeedback.impactOccurred('light');
         }
         
+        // Функция выбора кофейни
         function selectCafe(cafeId) {
             tg.showAlert(`Выбрана кофейня #${cafeId}`);
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            // Здесь можно перейти на другую страницу
-            // window.location.href = `main.html?cafe_id=${cafeId}`;
-        }
-        
-        function testAlert() {
-            tg.showAlert('✅ Тест пройден! Веб-приложение работает корректно.');
             tg.HapticFeedback.notificationOccurred('success');
+            
+            // Можно отправить данные обратно в бота
+            tg.sendData(JSON.stringify({
+                action: 'select_cafe',
+                cafe_id: cafeId
+            }));
+            
+            // Или перейти на другую страницу
+            // window.location.href = `cafe.html?id=${cafeId}`;
         }
         
-        // Отправляем данные в Telegram о готовности
+        // Тестовая функция
+        function testTelegram() {
+            tg.showAlert('✅ Тест пройден! Telegram Web App работает корректно.');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
+        // Автоматически загружаем кофейни при старте
+        setTimeout(loadCafes, 500);
+        
+        // Готовность
         tg.ready();
         
-        console.log('Telegram Web App initialized:', {
-            user: tg.initDataUnsafe.user,
+        console.log('Telegram Web App инициализирован:', {
             platform: tg.platform,
-            version: tg.version
+            version: tg.version,
+            user: tg.initDataUnsafe.user
         });
     </script>
 </body>
