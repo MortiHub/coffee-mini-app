@@ -3,96 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор кофейни</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Coffee Automation - Telegram Web App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .coffee-card {
-            transition: transform 0.2s, box-shadow 0.2s;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .coffee-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            text-align: left;
+            overflow-x: auto;
+        }
+        
+        .button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .secondary {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .telegram-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans">
-    <header class="bg-white shadow p-4 text-center sticky top-0 z-10">
-        <h1 class="text-2xl font-bold text-gray-800">☕ Выберите кофейню</h1>
-        <p class="text-gray-600 text-sm mt-1">Начните заказ, выбрав одну из наших кофеен</p>
-    </header>
-
-    <section class="p-4">
-        <div id="loading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-            <p class="mt-2 text-gray-500">Загружаем кофейни...</p>
+<body>
+    <div class="container">
+        <div class="icon">☕</div>
+        <h1>Coffee Automation</h1>
+        <p>Добро пожаловать в наше Telegram веб-приложение для заказа кофе!</p>
+        
+        <div class="status" id="status">
+            Загрузка Telegram Web App...
         </div>
-        <div id="coffee-shops" class="grid gap-4"></div>
-        <div id="error" class="hidden text-center py-8 text-red-500">
-            <p>Ошибка загрузки данных. Попробуйте позже.</p>
+        
+        <button class="button" onclick="showCafes()">
+            🏪 Посмотреть кофейни
+        </button>
+        
+        <button class="button secondary" onclick="testAlert()">
+            🧪 Тестовая кнопка
+        </button>
+        
+        <div class="telegram-info" id="telegram-info">
+            <p><small>Запущено из Telegram</small></p>
         </div>
-    </section>
+    </div>
 
     <script>
+        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.ready();
+        
+        // Расширяем на весь экран
         tg.expand();
-
-        const API_URL = "https://your-api.com"; // Замени на свой API
-
-        async function loadCafes() {
-            try {
-                const response = await fetch(`${API_URL}/cafes`);
-                const cafes = await response.json();
-                displayCafes(cafes);
-            } catch (error) {
-                console.error("Error loading cafes:", error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-            }
-        }
-
-        function displayCafes(cafes) {
-            const container = document.getElementById('coffee-shops');
-            const loading = document.getElementById('loading');
-            loading.style.display = 'none';
-
-            if (cafes.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <p>Нет доступных кофеен в данный момент.</p>
+        
+        // Показываем кнопку "Назад" если нужно
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            window.history.back();
+        });
+        
+        // Обновляем статус
+        document.getElementById('status').innerHTML = `
+            <strong>✅ Telegram Web App подключен</strong><br>
+            Пользователь: ${tg.initDataUnsafe.user?.first_name || 'Гость'}<br>
+            ID: ${tg.initDataUnsafe.user?.id || 'Неизвестно'}<br>
+            Платформа: ${tg.platform}
+        `;
+        
+        // Показываем информацию о Telegram
+        document.getElementById('telegram-info').innerHTML = `
+            <p><small>Запущено из Telegram • ${tg.platform} • v${tg.version}</small></p>
+        `;
+        
+        // Функции
+        function showCafes() {
+            const cafes = [
+                { id: 1, name: "Кофейня Центральная" },
+                { id: 2, name: "Кофейня Уютная" },
+                { id: 3, name: "Кофейня Экспресс" }
+            ];
+            
+            let cafesHTML = '<h3>🏪 Наши кофейни:</h3>';
+            cafes.forEach(cafe => {
+                cafesHTML += `
+                    <div style="background:rgba(255,255,255,0.1);padding:10px;margin:10px 0;border-radius:10px;">
+                        <strong>${cafe.name}</strong><br>
+                        <button onclick="selectCafe(${cafe.id})" style="margin-top:5px;padding:5px 15px;border-radius:5px;background:#4CAF50;color:white;border:none;">
+                            Выбрать
+                        </button>
                     </div>
                 `;
-                return;
-            }
-
-            cafes.forEach(cafe => {
-                const card = document.createElement('div');
-                card.className = 'coffee-card bg-white rounded-xl shadow-md overflow-hidden';
-                card.innerHTML = `
-                    <a href="main.html?cafe_id=${cafe.id}">
-                        <div class="h-48 bg-gray-200 flex items-center justify-center">
-                            <span class="text-gray-400 text-4xl">☕</span>
-                        </div>
-                        <div class="p-4">
-                            <h2 class="text-xl font-bold text-gray-800">${cafe.name}</h2>
-                            <p class="text-gray-600 text-sm mt-1">📍 ${cafe.address}</p>
-                            <p class="text-gray-600 text-sm mt-1">📞 ${cafe.phone}</p>
-                            <div class="mt-3 flex justify-between items-center">
-                                <span class="text-green-600 font-bold">Открыто</span>
-                                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded-full text-sm transition">
-                                    Выбрать →
-                                </button>
-                            </div>
-                        </div>
-                    </a>
-                `;
-                container.appendChild(card);
             });
+            
+            document.getElementById('status').innerHTML = cafesHTML;
         }
-
-        // Загружаем кофейни при загрузке страницы
-        document.addEventListener('DOMContentLoaded', loadCafes);
+        
+        function selectCafe(cafeId) {
+            tg.showAlert(`Выбрана кофейня #${cafeId}`);
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            // Здесь можно перейти на другую страницу
+            // window.location.href = `main.html?cafe_id=${cafeId}`;
+        }
+        
+        function testAlert() {
+            tg.showAlert('✅ Тест пройден! Веб-приложение работает корректно.');
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+        
+        // Отправляем данные в Telegram о готовности
+        tg.ready();
+        
+        console.log('Telegram Web App initialized:', {
+            user: tg.initDataUnsafe.user,
+            platform: tg.platform,
+            version: tg.version
+        });
     </script>
 </body>
 </html>
