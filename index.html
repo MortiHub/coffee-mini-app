@@ -8,64 +8,91 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         .coffee-card {
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .coffee-card:hover {
-            transform: scale(1.02);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <header class="bg-white shadow p-4 text-center">
-        <h1 class="text-xl font-bold">Выберите кофейню</h1>
+<body class="bg-gray-50 font-sans">
+    <header class="bg-white shadow p-4 text-center sticky top-0 z-10">
+        <h1 class="text-2xl font-bold text-gray-800">☕ Выберите кофейню</h1>
+        <p class="text-gray-600 text-sm mt-1">Начните заказ, выбрав одну из наших кофеен</p>
     </header>
 
     <section class="p-4">
+        <div id="loading" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+            <p class="mt-2 text-gray-500">Загружаем кофейни...</p>
+        </div>
         <div id="coffee-shops" class="grid gap-4"></div>
+        <div id="error" class="hidden text-center py-8 text-red-500">
+            <p>Ошибка загрузки данных. Попробуйте позже.</p>
+        </div>
     </section>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
+        tg.expand();
 
-        const coffeeShops = [
-            {
-                id: '1',
-                name: 'Кофейня Центральная',
-                description: 'Уютная кофейня в центре города с широким выбором напитков.',
-                address: 'ул. Центральная, 10, Москва',
-                img: 'https://via.placeholder.com/300'
-            },
-            {
-                id: '2',
-                name: 'Кофейня Уютная',
-                description: 'Тёплая атмосфера и вкусные десерты для идеального отдыха.',
-                address: 'ул. Садовая, 25, Москва',
-                img: 'https://via.placeholder.com/300'
-            },
-            {
-                id: '3',
-                name: 'Кофейня Экспресс',
-                description: 'Быстрое обслуживание и качественный кофе на вынос.',
-                address: 'ул. Лесная, 5, Москва',
-                img: 'https://via.placeholder.com/300'
+        const API_URL = "https://your-api.com"; // Замени на свой API
+
+        async function loadCafes() {
+            try {
+                const response = await fetch(`${API_URL}/cafes`);
+                const cafes = await response.json();
+                displayCafes(cafes);
+            } catch (error) {
+                console.error("Error loading cafes:", error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
             }
-        ];
+        }
 
-        const coffeeShopsContainer = document.getElementById('coffee-shops');
-        coffeeShops.forEach(shop => {
-            const card = document.createElement('div');
-            card.className = 'coffee-card bg-white rounded-lg shadow p-4';
-            card.innerHTML = `
-                <a href="main.html?cafe_id=${shop.id}">
-                    <img src="${shop.img}" alt="${shop.name}" class="w-full h-48 object-cover rounded-lg">
-                    <h2 class="text-lg font-bold mt-2">${shop.name}</h2>
-                    <p class="text-sm text-gray-600">${shop.description}</p>
-                    <p class="text-sm text-gray-800 mt-1">📍 ${shop.address}</p>
-                </a>
-            `;
-            coffeeShopsContainer.appendChild(card);
-        });
+        function displayCafes(cafes) {
+            const container = document.getElementById('coffee-shops');
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
+
+            if (cafes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>Нет доступных кофеен в данный момент.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            cafes.forEach(cafe => {
+                const card = document.createElement('div');
+                card.className = 'coffee-card bg-white rounded-xl shadow-md overflow-hidden';
+                card.innerHTML = `
+                    <a href="main.html?cafe_id=${cafe.id}">
+                        <div class="h-48 bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-400 text-4xl">☕</span>
+                        </div>
+                        <div class="p-4">
+                            <h2 class="text-xl font-bold text-gray-800">${cafe.name}</h2>
+                            <p class="text-gray-600 text-sm mt-1">📍 ${cafe.address}</p>
+                            <p class="text-gray-600 text-sm mt-1">📞 ${cafe.phone}</p>
+                            <div class="mt-3 flex justify-between items-center">
+                                <span class="text-green-600 font-bold">Открыто</span>
+                                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded-full text-sm transition">
+                                    Выбрать →
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Загружаем кофейни при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadCafes);
     </script>
 </body>
 </html>
